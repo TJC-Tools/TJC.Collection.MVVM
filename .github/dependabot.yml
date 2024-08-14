@@ -1,0 +1,20 @@
+version: 2
+
+updates:
+  - package-ecosystem: github-actions
+    directory: "/"
+    commit-message:
+      prefix: "(dependabot)"
+    reviewers:
+      - "${{ secrets.GHA_REVIEWER }}"
+    schedule:
+      interval: monthly
+
+  - package-ecosystem: nuget
+    directory: "/"
+    commit-message:
+      prefix: "(dependabot)"
+    reviewers:
+      - "${{ secrets.NUGET_REVIEWER }}"
+    schedule:
+      interval: daily

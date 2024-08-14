@@ -1,0 +1,40 @@
+﻿<Project Sdk="Microsoft.NET.Sdk">
+
+	<PropertyGroup>
+		<TargetFramework>net8.0</TargetFramework>
+		<ImplicitUsings>enable</ImplicitUsings>
+		<Nullable>enable</Nullable>
+		<Title>TJC Collection MVVM</Title>
+		<Description>Collection of NuGet Packages for Model-View-ViewModel Applications</Description>
+		<RepositoryUrl>https://github.com/TJC-Tools/TJC.Collection.MVVM</RepositoryUrl>
+		<PackageReadmeFile>README.md</PackageReadmeFile>
+	</PropertyGroup>
+
+	<ItemGroup>
+		<PackageReference Include="TJC.MVVM" Version="0.1.0" />
+		<PackageReference Include="TJC.Inclusion" Version="0.1.2" />
+		<PackageReference Include="TJC.Logging" Version="0.1.6" />
+		<PackageReference Include="TJC.Priority" Version="0.1.1" />
+		<PackageReference Include="TJC.Singleton" Version="0.1.4" />
+		<PackageReference Include="TJC.StringExtensions" Version="0.1.2" />
+		<PackageReference Include="TJC.TimeExtensions" Version="0.1.0" />
+	</ItemGroup>
+
+	<ItemGroup>
+		<None Remove="Nuget.config" />
+	</ItemGroup>
+
+	<ItemGroup>
+		<Content Include="Nuget.config">
+			<CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+		</Content>
+	</ItemGroup>
+
+	<ItemGroup>
+		<None Include="..\README.md">
+			<Pack>True</Pack>
+			<PackagePath>\</PackagePath>
+		</None>
+	</ItemGroup>
+
+</Project>

@@ -1,0 +1,17 @@
+name: Error Annotation
+description: Error Annotation
+
+inputs:
+  message:
+    description: "Message to Display"
+    required: true
+
+runs:
+  using: "composite"
+  steps:
+    - uses: actions/github-script@v7.0.1
+      with:
+        script: |
+          var message = '${{ inputs.message }}';
+          message = message.replace(/(\r\n|\n|\r)/gm, '');
+          core.error(message);

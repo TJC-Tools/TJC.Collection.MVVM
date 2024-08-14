@@ -1,0 +1,47 @@
+name: Exit Code
+description: Exit Code
+
+inputs:
+  code:
+    description: "Exit Code Number (ensure it is unique across all workflows/actions)"
+    required: true
+  message:
+    description: "Exit Message"
+    required: false
+    default: ''
+  level:
+    description: "Annotation Level (Error, Warning, Debug, Notice)"
+    default: error
+
+runs:
+  using: "composite"
+  steps:
+    - id: createMessage
+      uses: actions/github-script@v7.0.1
+      with:
+        result-encoding: string
+        script: >
+          return '[Exit Code: ${{ inputs.code }}] ${{ inputs.message }} | Note: Search for "code: ${{ inputs.code }}" in the .github/ directory to find the source of this error'
+
+    - uses: ./.github/actions/tools/annotation/error
+      if: inputs.level == 'error'
+      with:
+        message: ${{ steps.createMessage.outputs.result }}
+
+    - uses: ./.github/actions/tools/annotation/warning
+      if: inputs.level == 'warning'
+      with:
+        message: ${{ steps.createMessage.outputs.result }}
+
+    - uses: ./.github/actions/tools/annotation/debug
+      if: inputs.level == 'debug'
+      with:
+        message: ${{ steps.createMessage.outputs.result }}
+
+    - uses: ./.github/actions/tools/annotation/notice
+      if: inputs.level == 'notice'
+      with:
+        message: ${{ steps.createMessage.outputs.result }}
+
+    - shell: cmd
+      run: exit ${{ inputs.code }}

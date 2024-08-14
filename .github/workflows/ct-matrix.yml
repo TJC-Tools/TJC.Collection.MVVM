@@ -1,0 +1,124 @@
+name: Testing Matrix
+run-name: PR#${{ github.event.number }}${{ github.event.pull_request.draft && ' [DRAFT]' || '' }} - Continuous Testing (Matrix) - (${{ github.event.pull_request.head.ref }}-to-${{ github.event.pull_request.base.ref }})
+
+on:
+  pull_request:
+    branches:
+      - main
+    types:
+      - opened
+      - reopened
+      - synchronize
+      - ready_for_review
+
+env:
+  build_directory: Build
+  test_project_suffix: Tests
+
+concurrency:
+  group: Continuous-Testing-${{ github.event.pull_request.head.ref }}-to-${{ github.event.pull_request.base.ref }}
+  cancel-in-progress: true
+
+jobs:
+  buildAndRunTests:
+    name: Continuous Testing
+    permissions: write-all
+    runs-on: windows-2022
+    if: ${{ !github.event.pull_request.draft }}
+    strategy:
+      fail-fast: false
+      matrix:
+        solution: [ Testing.sln ]
+        dotnet-version: [ '8.0.x' ]
+
+    steps:
+      - name: Checkout [${{ github.event.pull_request.head.ref }}]
+        uses: actions/checkout@v4
+        with:
+          ref: ${{ github.event.pull_request.head.ref }}
+          token: ${{ secrets.TJC_TOKEN || secrets.GITHUB_TOKEN }}
+          submodules: recursive
+
+      ####################################################################################################
+      ###                                          Initialize                                          ###
+      ####################################################################################################
+      # Check for Changes in the Non-Ignored Files; If there are none, then Skip Tests
+      # Skip: README, LICENSE, .gitignore, GitHub Workflows & Actions, etc.
+      - name: Check for Changes to Determine if Tests can be Skipped
+        id: getChanges
+        uses: tj-actions/changed-files@v44.5.7
+        with:
+          files_ignore: |
+            README.md
+            LICENSE
+            .github/**
+            .gitignore
+
+      - name: Check if Tests can be Skipped
+        id: getCanSkip
+        uses: actions/github-script@v7.0.1
+        with:
+          result-encoding: string
+          script: |
+            var changes = '${{ fromJSON(steps.getChanges.outputs.any_modified) }}'
+            var skip = changes == 'false'
+            console.log('Skip:', skip)
+            return skip
+
+      ####################################################################################################
+      ###                                     Prepare to Run Tests                                     ###
+      ####################################################################################################
+      - name: Setup .NET [${{ matrix.dotnet-version }}]
+        uses: actions/setup-dotnet@v4
+        with:
+          dotnet-version: ${{ matrix.dotnet-version }}
+        
+      - name: Setup NuGet
+        uses: NuGet/setup-nuget@v2.0.0
+        
+      - name: Restore NuGet
+        run: nuget restore ${{ env.PROJECT_FILE_PATH }}
+      
+      - name: Restore Dependencies
+        if: ${{ !fromJSON(steps.getCanSkip.outputs.result) }}
+        run: dotnet restore
+
+      ####################################################################################################
+      ###                                          Run Tests                                           ###
+      ####################################################################################################
+      - name: Build
+        if: ${{ !fromJSON(steps.getCanSkip.outputs.result) }}
+        run: dotnet build --no-restore
+
+      - name: Error - Build Failed for ${{ matrix.solution }}
+        if: failure()
+        uses: ./.github/actions/tools/annotation/error
+        with:
+          message: '[Error] Build Failed for ${{ matrix.solution }}'
+      
+      # Test 2 - Run All Unit Tests within Project
+      # Note: This Action Requires Windows
+      - name: Run Tests for [${{ matrix.solution }}]
+        if: ${{ !fromJSON(steps.getCanSkip.outputs.result) }}
+        run: dotnet test --no-build --verbosity normal
+
+      - name: Error - Tests Failed for ${{ matrix.solution }}
+        if: failure()
+        uses: ./.github/actions/tools/annotation/error
+        with:
+          message: '[Error] Tests Failed for ${{ matrix.solution }}'
+
+      ####################################################################################################
+      ###                                        Notify Success                                        ###
+      ####################################################################################################
+      - name: Success - Successfully Built & Ran Tests for ${{ matrix.solution }}
+        if: success() && !fromJSON(steps.getCanSkip.outputs.result)
+        uses: ./.github/actions/tools/annotation/notice
+        with:
+          message: '[Success] Built & Ran Tests for ${{ matrix.solution }}'
+
+      - name: Success - Skipped Tests for ${{ matrix.solution }}
+        if: success() && fromJSON(steps.getCanSkip.outputs.result)
+        uses: ./.github/actions/tools/annotation/notice
+        with:
+          message: '[Success] Skipped Tests for ${{ matrix.solution }}'
