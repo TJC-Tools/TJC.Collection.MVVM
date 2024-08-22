@@ -14,7 +14,7 @@ env:
   PROJECT_DIR_PATH: TJC.Collection.MVVM
 
 jobs:
-  incrementPatch:
+  incrementVersion:
     name: Push [${{ github.event.head_commit.message }}]
     permissions: write-all
     runs-on: windows-2022
@@ -26,12 +26,23 @@ jobs:
         with:
           token: ${{ secrets.TJC_TOKEN || secrets.GITHUB_TOKEN }}
           fetch-depth: 0
-          
+
       - name: Check for Changes to See if Tagging can be Skipped
         id: getChanges
         uses: tj-actions/changed-files@v44.5.7
         with:
           files: ${{ env.PROJECT_DIR_PATH }}/**
+
+      - name: Get Pull Request
+        uses: 8BitJonny/gh-get-current-pr@3.0.0
+        id: getPR
+
+      - name: Pull Request [${{ steps.getPR.outputs.number }}]
+        if: steps.getPR.outputs.pr_found == 'true'
+        run: |
+          echo "From ${{ fromJSON(steps.getPR.outputs.pr).head.ref }}"
+          echo "To ${{ fromJSON(steps.getPR.outputs.pr).base.ref }}"
+          echo "Labels: ${{ join(fromJSON(steps.getPR.outputs.pr).labels.*.name, ', ') }}"
 
       - name: Get Last Version
         id: getLastVersion
@@ -55,14 +66,28 @@ jobs:
         with:
           result-encoding: string
           script: |
+            var labels = "${{ join(fromJSON(steps.getPR.outputs.pr).labels.*.name, ', ') }}"
             var latestTag = "${{ steps.getLastVersion.outputs.result }}"
             if (latestTag == "")
               return "v0.1.0"
             var ver = latestTag.replace("v","").split("-")[0]
             console.log('Last Version:', "v" + ver)
-            var major = ver.split(".")[0]
-            var minor = ver.split(".")[1]
-            var patch = parseInt(ver.split(".")[2]) + 1
+            // Get Version Numbers
+            var major = parseInt(ver.split(".")[0])
+            var minor = parseInt(ver.split(".")[1])
+            var patch = parseInt(ver.split(".")[2])
+            // Increment depending on pull request labels
+            if (labels.includes("major")) {
+              major = major + 1
+              minor = 0
+              patch = 0
+            } else if (labels.includes("minor")) {
+              minor = minor + 1
+              patch = 0
+            } else {
+              patch = patch + 1
+            }
+            // Return version
             var next = "v" + major + "." + minor + "." + patch
             console.log('Next Version:', next)
             return next
