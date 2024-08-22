@@ -18,6 +18,7 @@
 		<PackageReference Include="TJC.Singleton" Version="0.1.4" />
 		<PackageReference Include="TJC.StringExtensions" Version="0.1.2" />
 		<PackageReference Include="TJC.TimeExtensions" Version="0.1.0" />
+		<PackageReference Include="TJC.AssemblyExtensions" Version="0.1.0" />
 	</ItemGroup>
 
 	<ItemGroup>
