@@ -1,5 +1,5 @@
-name: Push -> Tag
-run-name: Push [${{ github.ref_name }}] -> Tag   
+name: Push → Tag
+run-name: Push [${{ github.ref_name }}] → Tag   
 
 on:
   push:
