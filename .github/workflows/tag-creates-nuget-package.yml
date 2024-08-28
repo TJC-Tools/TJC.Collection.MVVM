@@ -1,5 +1,5 @@
-name: Tag -> Create Package
-run-name: Tag [${{ github.ref_name }}] -> Create Package
+name: Tag → Create Package
+run-name: Tag [${{ github.ref_name }}] → Create Package
 
 on:
   push:
