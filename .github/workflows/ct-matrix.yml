@@ -46,7 +46,7 @@ jobs:
       # Skip: README, LICENSE, .gitignore, GitHub Workflows & Actions, etc.
       - name: Check for Changes to Determine if Tests can be Skipped
         id: getChanges
-        uses: tj-actions/changed-files@v44.5.7
+        uses: tj-actions/changed-files@v45.0.0
         with:
           files_ignore: |
             README.md
