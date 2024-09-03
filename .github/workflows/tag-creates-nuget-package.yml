@@ -51,9 +51,6 @@ jobs:
             console.log('Version:', simple)
             return simple
 
-      - name: Build DLL
-        run: msbuild ${{ env.PROJECT_FILE_PATH }} /p:Configuration=Release
-
       - name: Pack NuGet Package [${{ steps.getVer.outputs.result }}]
         run: dotnet pack ${{ env.PROJECT_FILE_PATH }} -p:Version='${{ steps.getVer.outputs.result }}' -c Release   
 
