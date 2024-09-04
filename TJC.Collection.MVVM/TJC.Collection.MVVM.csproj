@@ -90,6 +90,11 @@
 	<Message Text="Append Third-Party Licenses to License File" Importance="high" />
 	<AppendNewLineAndFile File1="..\LICENSE" File2="..\THIRD-PARTY-LICENSES" />
   </Target>
+  <!-- POST-BUILD -->
+  <Target Name="CustomCleanupBuild" AfterTargets="Build">
+	<Message Text="=== CUSTOM CLEANUP ===" Importance="high" />
+	<CallTarget Targets="RestoreLicenseFile" />
+  </Target>
   <!-- POST-PACK -->
   <Target Name="CustomCleanup" AfterTargets="Pack">
 	<Message Text="=== CUSTOM CLEANUP ===" Importance="high" />
