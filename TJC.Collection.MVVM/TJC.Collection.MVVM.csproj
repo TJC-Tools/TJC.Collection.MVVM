@@ -1,103 +1,103 @@
 <Project Sdk="Microsoft.NET.Sdk">
   <!-- DETAILS -->
   <PropertyGroup>
-    <TargetFramework>net8.0</TargetFramework>
-    <ImplicitUsings>enable</ImplicitUsings>
-    <Nullable>enable</Nullable>
-    <Title>TJC Collection MVVM</Title>
-    <Description>Collection of NuGet Packages for Model-View-ViewModel Applications</Description>
-    <Authors>Tyler Carrol</Authors>
-    <PackageReadmeFile>README.md</PackageReadmeFile>
-    <PackageLicenseFile>LICENSE</PackageLicenseFile>
-    <RepositoryUrl>https://github.com/TJC-Tools/TJC.Collection.MVVM</RepositoryUrl>
+	<TargetFramework>net8.0</TargetFramework>
+	<ImplicitUsings>enable</ImplicitUsings>
+	<Nullable>enable</Nullable>
+	<Title>TJC Collection MVVM</Title>
+	<Description>Collection of NuGet Packages for Model-View-ViewModel Applications</Description>
+	<Authors>Tyler Carrol</Authors>
+	<PackageReadmeFile>README.md</PackageReadmeFile>
+	<PackageLicenseFile>LICENSE</PackageLicenseFile>
+	<RepositoryUrl>https://github.com/TJC-Tools/TJC.Collection.MVVM</RepositoryUrl>
   </PropertyGroup>
   <!-- INCLUDED FILES -->
   <ItemGroup>
-    <None Remove="Nuget.config" />
+	<None Remove="Nuget.config" />
   </ItemGroup>
   <ItemGroup>
-    <Content Include="Nuget.config">
-      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
-    </Content>
+	<Content Include="Nuget.config">
+	  <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+	</Content>
   </ItemGroup>
   <ItemGroup>
-    <None Include="..\README.md">
-      <Pack>True</Pack>
-      <PackagePath>\</PackagePath>
-    </None>
-    <None Include="..\LICENSE">
-      <Pack>True</Pack>
-      <PackagePath>\</PackagePath>
-    </None>
+	<None Include="..\README.md">
+	  <Pack>True</Pack>
+	  <PackagePath>\</PackagePath>
+	</None>
+	<None Include="..\LICENSE">
+	  <Pack>True</Pack>
+	  <PackagePath>\</PackagePath>
+	</None>
 		<EmbeddedResource Include="..\LICENSE" />
   </ItemGroup>
   <!-- DEPENDENCIES -->
   <ItemGroup>
-    <PackageReference Include="TJC.MVVM" Version="0.1.2" />
-    <PackageReference Include="TJC.Inclusion" Version="0.1.2" />
-    <PackageReference Include="TJC.Logging" Version="0.1.6" />
-    <PackageReference Include="TJC.Priority" Version="0.1.1" />
-    <PackageReference Include="TJC.Singleton" Version="0.1.4" />
-    <PackageReference Include="TJC.StringExtensions" Version="0.1.4" />
-    <PackageReference Include="TJC.TimeExtensions" Version="0.1.0" />
-    <PackageReference Include="TJC.AssemblyExtensions" Version="0.1.0" />
+	<PackageReference Include="TJC.MVVM" Version="0.1.4" />
+	<PackageReference Include="TJC.Inclusion" Version="0.1.4" />
+	<PackageReference Include="TJC.Logging" Version="0.1.8" />
+	<PackageReference Include="TJC.Priority" Version="0.1.3" />
+	<PackageReference Include="TJC.Singleton" Version="0.1.6" />
+	<PackageReference Include="TJC.StringExtensions" Version="0.1.6" />
+	<PackageReference Include="TJC.TimeExtensions" Version="0.1.2" />
+	<PackageReference Include="TJC.AssemblyExtensions" Version="0.1.2" />
   </ItemGroup>
   <!-- TASKS -->
   <UsingTask TaskName="ReadFileContent" TaskFactory="RoslynCodeTaskFactory" AssemblyName="Microsoft.Build.Tasks.Core">
-    <ParameterGroup>
-      <FilePath ParameterType="System.String" Required="true" />
-      <Content Output="true" ParameterType="System.String" />
-    </ParameterGroup>
-    <Task>
-      <Using Namespace="System.IO" />
-      <Code Type="Fragment" Language="cs">
-        <![CDATA[
-          Content = File.ReadAllText(FilePath);
-        ]]>
-      </Code>
-    </Task>
+	<ParameterGroup>
+	  <FilePath ParameterType="System.String" Required="true" />
+	  <Content Output="true" ParameterType="System.String" />
+	</ParameterGroup>
+	<Task>
+	  <Using Namespace="System.IO" />
+	  <Code Type="Fragment" Language="cs">
+		<![CDATA[
+		  Content = File.ReadAllText(FilePath);
+		]]>
+	  </Code>
+	</Task>
   </UsingTask>
   <UsingTask TaskName="AppendNewLineAndFile" TaskFactory="RoslynCodeTaskFactory" AssemblyName="Microsoft.Build.Tasks.Core">
-    <ParameterGroup>
-      <File1 ParameterType="System.String" Required="true" />
-      <File2 ParameterType="System.String" Required="true" />
-    </ParameterGroup>
-    <Task>
-      <Using Namespace="System.IO" />
-      <Code Type="Fragment" Language="cs">
-        <![CDATA[
-          var text = Environment.NewLine;
-          text += "===========================================================";
-          text += Environment.NewLine;
-          text += Environment.NewLine;
-          text += File.ReadAllText(File2);
-          text += Environment.NewLine;
-          File.AppendAllText(File1, text);
-        ]]>
-      </Code>
-    </Task>
+	<ParameterGroup>
+	  <File1 ParameterType="System.String" Required="true" />
+	  <File2 ParameterType="System.String" Required="true" />
+	</ParameterGroup>
+	<Task>
+	  <Using Namespace="System.IO" />
+	  <Code Type="Fragment" Language="cs">
+		<![CDATA[
+		  var text = Environment.NewLine;
+		  text += "===========================================================";
+		  text += Environment.NewLine;
+		  text += Environment.NewLine;
+		  text += File.ReadAllText(File2);
+		  text += Environment.NewLine;
+		  File.AppendAllText(File1, text);
+		]]>
+	  </Code>
+	</Task>
   </UsingTask>	
   <!-- PRE-BUILD -->
   <Target Name="CustomSetup" BeforeTargets="Build">
-    <Message Text="=== CUSTOM SETUP ===" Importance="high" />
-    <!-- Store the original contents of the license file -->
-    <ReadFileContent FilePath="..\LICENSE">
-      <Output TaskParameter="Content" PropertyName="OriginalLicenseLines" />
-    </ReadFileContent>
-    <CallTarget Targets="AppendThirdPartyLicensesToLicenseFile" />
+	<Message Text="=== CUSTOM SETUP ===" Importance="high" />
+	<!-- Store the original contents of the license file -->
+	<ReadFileContent FilePath="..\LICENSE">
+	  <Output TaskParameter="Content" PropertyName="OriginalLicenseLines" />
+	</ReadFileContent>
+	<CallTarget Targets="AppendThirdPartyLicensesToLicenseFile" />
   </Target>
   <Target Name="AppendThirdPartyLicensesToLicenseFile">
-    <Message Text="Append Third-Party Licenses to License File" Importance="high" />
-    <AppendNewLineAndFile File1="..\LICENSE" File2="..\THIRD-PARTY-LICENSES" />
+	<Message Text="Append Third-Party Licenses to License File" Importance="high" />
+	<AppendNewLineAndFile File1="..\LICENSE" File2="..\THIRD-PARTY-LICENSES" />
   </Target>
   <!-- POST-PACK -->
   <Target Name="CustomCleanup" AfterTargets="Pack">
-    <Message Text="=== CUSTOM CLEANUP ===" Importance="high" />
-    <CallTarget Targets="RestoreLicenseFile" />
+	<Message Text="=== CUSTOM CLEANUP ===" Importance="high" />
+	<CallTarget Targets="RestoreLicenseFile" />
   </Target>
   <!-- Cleanup License File -->
   <Target Name="RestoreLicenseFile">
-    <Message Text="Restore License File Contents" Importance="high" />
-    <WriteLinesToFile File="..\LICENSE" Lines="$(OriginalLicenseLines)" Overwrite="true" Encoding="UTF-8" />
+	<Message Text="Restore License File Contents" Importance="high" />
+	<WriteLinesToFile File="..\LICENSE" Lines="$(OriginalLicenseLines)" Overwrite="true" Encoding="UTF-8" />
   </Target>
 </Project>
