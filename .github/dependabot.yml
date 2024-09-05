@@ -18,3 +18,4 @@ updates:
       - "${{ secrets.NUGET_REVIEWER }}"
     schedule:
       interval: daily
+    open-pull-requests-limit: 25
