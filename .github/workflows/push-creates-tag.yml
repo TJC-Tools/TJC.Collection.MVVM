@@ -29,7 +29,7 @@ jobs:
 
       - name: Check for Changes to See if Tagging can be Skipped
         id: getChanges
-        uses: tj-actions/changed-files@v45.0.0
+        uses: tj-actions/changed-files@v45.0.1
         with:
           files: ${{ env.PROJECT_DIR_PATH }}/**
 
