@@ -77,8 +77,8 @@
 	  </Code>
 	</Task>
   </UsingTask>	
-  <!-- PRE-BUILD -->
-  <Target Name="CustomSetup" BeforeTargets="Build">
+  <!-- PRE-PACK -->
+  <Target Name="CustomSetup" BeforeTargets="_IntermediatePack">
 	<Message Text="=== CUSTOM SETUP ===" Importance="high" />
 	<!-- Store the original contents of the license file -->
 	<ReadFileContent FilePath="..\LICENSE">
