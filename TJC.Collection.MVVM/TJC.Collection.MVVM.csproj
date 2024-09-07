@@ -35,7 +35,7 @@
   <ItemGroup>
 	<PackageReference Include="TJC.MVVM" Version="0.1.6" />
 	<PackageReference Include="TJC.Inclusion" Version="0.1.6" />
-	<PackageReference Include="TJC.Logging" Version="0.1.9" />
+	<PackageReference Include="TJC.Logging" Version="0.1.10" />
 	<PackageReference Include="TJC.Priority" Version="0.1.5" />
 	<PackageReference Include="TJC.Singleton" Version="0.1.8" />
 	<PackageReference Include="TJC.StringExtensions" Version="0.1.9" />
