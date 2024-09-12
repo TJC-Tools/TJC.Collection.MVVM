@@ -1,4 +1,4 @@
-<Project Sdk="Microsoft.NET.Sdk">
+﻿<Project Sdk="Microsoft.NET.Sdk">
   <!-- DETAILS -->
   <PropertyGroup>
 	<TargetFramework>net8.0</TargetFramework>
@@ -33,14 +33,8 @@
   </ItemGroup>
   <!-- DEPENDENCIES -->
   <ItemGroup>
+	<PackageReference Include="TJC.Collection.GUI" Version="0.1.1" />
 	<PackageReference Include="TJC.MVVM" Version="0.1.6" />
-	<PackageReference Include="TJC.Inclusion" Version="0.1.6" />
-	<PackageReference Include="TJC.Logging" Version="0.1.10" />
-	<PackageReference Include="TJC.Priority" Version="0.1.5" />
-	<PackageReference Include="TJC.Singleton" Version="0.1.8" />
-	<PackageReference Include="TJC.StringExtensions" Version="0.1.9" />
-	<PackageReference Include="TJC.TimeExtensions" Version="0.1.4" />
-	<PackageReference Include="TJC.AssemblyExtensions" Version="0.1.5" />
   </ItemGroup>
   <!-- TASKS -->
   <UsingTask TaskName="ReadFileContent" TaskFactory="RoslynCodeTaskFactory" AssemblyName="Microsoft.Build.Tasks.Core">
