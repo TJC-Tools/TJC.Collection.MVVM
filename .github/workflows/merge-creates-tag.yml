@@ -1,0 +1,95 @@
+name: Pull Request Merge → Tag
+run-name: ${{ format('PR#{0} - {1}', github.event.number, !github.event.pull_request.merged && 'Closed without merging' || !contains(join(github.event.pull_request.labels.*.name, ', '), 'major') && !contains(join(github.event.pull_request.labels.*.name, ', '), 'minor') && !contains(join(github.event.pull_request.labels.*.name, ', '), 'patch') && 'Merged [No Increment Label Specified]' || format('Merged → Tag [{0}]', join(github.event.pull_request.labels.*.name, ', ')))  }}
+# If the pull request was not merged; the run-name will be 'PR#123 - Closed without merging'
+# If labels does not contain 'major', 'minor', or 'patch'; the run-name will be 'PR#123 - Merged [No Increment Label Specified]'
+# Otherwise, if the pull request was merged the run-name will be 'PR#123 - Merged → Tag [patch]'
+
+on:
+  pull_request:
+    types: closed
+    branches:
+      - main
+
+concurrency:
+  group: Versioning-${{ github.ref_name }}
+  cancel-in-progress: false
+  
+env:
+  PROJECT_DIR_PATH: TJC.Collection.MVVM
+
+jobs:
+  incrementVersion:
+    name: PR#[${{ github.event.number }}] Merge - Increment Version
+    permissions: write-all
+    if: github.event.pull_request.merged && (contains(join(github.event.pull_request.labels.*.name, ', '), 'major') || contains(join(github.event.pull_request.labels.*.name, ', '), 'minor') || contains(join(github.event.pull_request.labels.*.name, ', '), 'patch'))
+    runs-on: windows-2022
+    outputs:
+      VersionNumber: ${{ steps.incrementVersion.outputs.result }}
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+        with:
+          token: ${{ secrets.TJC_TOKEN || secrets.GITHUB_TOKEN }}
+          fetch-depth: 0
+
+      - name: Get Last Version [${{ github.ref_name }}]
+        id: getLastVersion
+        uses: actions/github-script@v7.0.1
+        with:
+          result-encoding: string
+          script: |
+            try {
+              var latestTag = require("child_process").execSync("git describe --tags").toString().trim()
+              console.log('Latest Tag:', latestTag)
+              return latestTag
+            } catch {
+              return ""
+            }
+
+      # Get Next Version (from pull request merge - using labels to select whether to increment major, minor, or patch)
+      - name: Get Next Version [${{ steps.getLastVersion.outputs.result }}] [${{ join(github.event.pull_request.labels.*.name, ', ') }}]
+        id: getNextVersion
+        uses: actions/github-script@v7.0.1
+        with:
+          result-encoding: string
+          script: |
+            var labels = "${{ join(github.event.pull_request.labels.*.name, ', ') }}"
+            var latestTag = "${{ steps.getLastVersion.outputs.result }}"
+            if (latestTag == "")
+              return "v0.1.0"
+            var ver = latestTag.replace("v","").split("-")[0]
+            console.log('Last Version:', "v" + ver)
+            // Get Version Numbers
+            var major = parseInt(ver.split(".")[0])
+            var minor = parseInt(ver.split(".")[1])
+            var patch = parseInt(ver.split(".")[2])
+            // Increment depending on pull request labels
+            if (labels.includes("major")) {
+              major = major + 1
+              minor = 0
+              patch = 0
+            } else if (labels.includes("minor")) {
+              minor = minor + 1
+              patch = 0
+            } else if (labels.includes("patch")) {
+              patch = patch + 1
+            } else {
+              return latestTag
+            }
+            
+            // Return version
+            var next = "v" + major + "." + minor + "." + patch
+            console.log('Next Version:', next)
+            return next
+
+      - name: Tag Version [${{ steps.getNextVersion.outputs.result }}]
+        if: ${{ steps.getNextVersion.outputs.result != steps.getLastVersion.outputs.result }}
+        run: |
+          git tag ${{ steps.getNextVersion.outputs.result }}
+          git push origin tag ${{ steps.getNextVersion.outputs.result }}
+
+      - name: Incremented Version [${{ steps.getNextVersion.outputs.result }}]
+        if: success()
+        uses: ./.github/actions/tools/annotation/notice
+        with:
+          message: Incremented Version [${{ steps.getNextVersion.outputs.result }}]
