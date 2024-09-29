@@ -6,8 +6,9 @@ on:
     tags: v**
 
 env:
-  PROJECT_FILE_PATH: TJC.Collection.MVVM/TJC.Collection.MVVM.csproj
+  PROJECT_NAME: TJC.Collection.MVVM
   PROJECT_DIR_PATH: TJC.Collection.MVVM
+  PROJECT_FILE_PATH: TJC.Collection.MVVM/TJC.Collection.MVVM.csproj
 
 jobs:
   package:
@@ -67,6 +68,14 @@ jobs:
             dotnet nuget push "$file" --api-key ${{ secrets.TJC_NUGET_PUBLISH }} --source https://api.nuget.org/v3/index.json
             dotnet nuget push "$file" --api-key ${{ secrets.TJC_TOKEN }} --source github
           }
+
+      - name: Release [${{ github.ref_name }}]
+        uses: ncipollo/release-action@v1.14.0
+        with:
+          name: ${{ env.PROJECT_NAME }} ${{ steps.getVer.outputs.result }}
+          tag: ${{ github.ref_name }}
+          artifacts: "${{ env.PROJECT_DIR_PATH }}/bin/Release/*.nupkg"
+          generateReleaseNotes: true
 
       - name: ${{ format('Published NuGet Package [{0}]', steps.getVer.outputs.result) }}
         if: success()
