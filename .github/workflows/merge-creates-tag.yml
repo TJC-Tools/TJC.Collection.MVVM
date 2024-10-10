@@ -32,64 +32,60 @@ jobs:
           token: ${{ secrets.TJC_TOKEN || secrets.GITHUB_TOKEN }}
           fetch-depth: 0
 
-      - name: Get Last Version [${{ github.ref_name }}]
-        id: getLastVersion
-        uses: actions/github-script@v7.0.1
-        with:
-          result-encoding: string
-          script: |
-            try {
-              var latestTag = require("child_process").execSync("git describe --tags").toString().trim()
-              console.log('Latest Tag:', latestTag)
-              return latestTag
-            } catch {
-              return ""
-            }
-
-      # Get Next Version (from pull request merge - using labels to select whether to increment major, minor, or patch)
-      - name: Get Next Version [${{ steps.getLastVersion.outputs.result }}] [${{ join(github.event.pull_request.labels.*.name, ', ') }}]
-        id: getNextVersion
+      ##################
+      ### VERSIONING ###
+      ##################
+      # Get Version Increment Type (using labels to select whether to increment major, minor, or patch)
+      - name: Get Version Increment Type [${{ join(github.event.pull_request.labels.*.name, ', ') }}]
+        id: get-version-increment-type
         uses: actions/github-script@v7.0.1
         with:
           result-encoding: string
           script: |
             var labels = "${{ join(github.event.pull_request.labels.*.name, ', ') }}"
-            var latestTag = "${{ steps.getLastVersion.outputs.result }}"
-            if (latestTag == "")
-              return "v0.1.0"
-            var ver = latestTag.replace("v","").split("-")[0]
-            console.log('Last Version:', "v" + ver)
-            // Get Version Numbers
-            var major = parseInt(ver.split(".")[0])
-            var minor = parseInt(ver.split(".")[1])
-            var patch = parseInt(ver.split(".")[2])
-            // Increment depending on pull request labels
+            var incrementType = "ERROR"
             if (labels.includes("major")) {
-              major = major + 1
-              minor = 0
-              patch = 0
+              incrementType = "major"
             } else if (labels.includes("minor")) {
-              minor = minor + 1
-              patch = 0
+              incrementType = "minor"
             } else if (labels.includes("patch")) {
-              patch = patch + 1
-            } else {
-              return latestTag
+              incrementType = "patch"
             }
-            
-            // Return version
-            var next = "v" + major + "." + minor + "." + patch
-            console.log('Next Version:', next)
-            return next
+            console.log('Increment Type:', incrementType)
+            return incrementType
 
-      - name: Tag Version [${{ steps.getNextVersion.outputs.result }}]
-        if: ${{ steps.getNextVersion.outputs.result != steps.getLastVersion.outputs.result }}
+      #################
+      ### CHANGELOG ###
+      #################
+      - name: Bump Changelog Version [${{ steps.get-version-increment-type.outputs.result }}]
+        id: update-changelog
+        uses: release-flow/keep-a-changelog-action@v3
+        with:
+          command: bump
+          version: ${{ steps.get-version-increment-type.outputs.result }}
+          keep-unreleased-section: true
+  
+      - name: Commit Changelog [${{ steps.update-changelog.outputs.version }}]
         run: |
-          git tag ${{ steps.getNextVersion.outputs.result }}
-          git push origin tag ${{ steps.getNextVersion.outputs.result }}
+          git config --local user.email "github-actions[bot]@users.noreply.github.com"
+          git config --local user.name "github-actions[bot]"
+          git commit -a -m "🤖 automated: Changelog ${{ steps.update-changelog.outputs.version }}" -m "Release Notes: ${{ steps.update-changelog.outputs.release-notes }}"
+          git remote set-url origin https://<PAT>@github.com/${{ github.repository }}.git
+          git push 
+        env:
+          PAT: ${{ secrets.TJC_TOKEN }}
 
-      - name: Incremented Version [${{ steps.getNextVersion.outputs.result }}]
+      ##################
+      ### TAG & PUSH ###
+      ##################
+      - name: Tag Version [${{ steps.update-changelog.outputs.version }}]
+        if: ${{ steps.update-changelog.outputs.version != steps.getLastVersion.outputs.result }}
+        run: |
+          git tag v${{ steps.update-changelog.outputs.version }}
+          git push origin tag v${{ steps.update-changelog.outputs.version }}
+
+      - name: Incremented Version [${{ steps.update-changelog.outputs.version }}]
         if: success()
         uses: ./.github/actions/tools/annotation/notice
         with:
-          message: Incremented Version [${{ steps.getNextVersion.outputs.result }}]
+          message: Incremented Version [${{ steps.update-changelog.outputs.version }}]
