@@ -6,9 +6,9 @@ updates:
     commit-message:
       prefix: "(dependabot)"
     assignees:
-      - "${{ secrets.GHA_REVIEWER }}"
+      - "TylerCarrol"
     reviewers:
-      - "${{ secrets.GHA_REVIEWER }}"
+      - "TylerCarrol"
     schedule:
       interval: monthly
 
@@ -17,9 +17,9 @@ updates:
     commit-message:
       prefix: "(dependabot)"
     assignees:
-      - "${{ secrets.NUGET_REVIEWER }}"
+      - "TylerCarrol"
     reviewers:
-      - "${{ secrets.NUGET_REVIEWER }}"
+      - "TylerCarrol"
     schedule:
       interval: daily
     open-pull-requests-limit: 25
