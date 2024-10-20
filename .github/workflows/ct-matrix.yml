@@ -113,7 +113,7 @@ jobs:
       ####################################################################################################
       - name: Upload Results to Codecov (Optional)
         if: ${{ !fromJSON(steps.getCanSkip.outputs.result) }}
-        uses: codecov/codecov-action@v4.6
+        uses: codecov/codecov-action@v4
         with:
           token: ${{ secrets.CODECOV_TOKEN }}
           files: '**/TestResults/**/coverage.cobertura.xml'
