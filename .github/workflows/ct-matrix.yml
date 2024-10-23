@@ -132,19 +132,6 @@ jobs:
           message: "[Error] Tests Failed for ${{ matrix.solution }}"
 
       ####################################################################################################
-      ###                                        Code Coverage                                         ###
-      ####################################################################################################
-      - name: Upload Results to Codecov (Optional)
-        if: ${{ !fromJSON(steps.getCanSkip.outputs.result) }}
-        uses: codecov/codecov-action@v4
-        with:
-          token: ${{ secrets.CODECOV_TOKEN }}
-          files: "**/TestResults/**/coverage.cobertura.xml"
-          flags: unit-tests
-          fail_ci_if_error: true
-          verbose: true
-
-      ####################################################################################################
       ###                                        Notify Success                                        ###
       ####################################################################################################
       - name: Success - Successfully Built & Ran Tests for ${{ matrix.solution }}
