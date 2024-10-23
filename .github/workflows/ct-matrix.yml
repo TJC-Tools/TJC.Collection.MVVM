@@ -1,3 +1,8 @@
+# This workflow is used test the project, by doing the following
+# 1. Ensure the project builds
+# 2. Run unit tests
+# 3. Upload code coverage
+---
 name: Testing Matrix
 run-name: PR#${{ github.event.number }}${{ github.event.pull_request.draft && ' [DRAFT]' || '' }} - Continuous Testing (Matrix) - (${{ github.event.pull_request.head.ref }}-to-${{ github.event.pull_request.base.ref }})
 
@@ -22,14 +27,17 @@ concurrency:
 jobs:
   buildAndRunTests:
     name: Continuous Testing
-    permissions: write-all
+    permissions:      
+      contents: read # Read access to code and content in the repository
+      pull-requests: read # Read access to pull request metadata for the event
+      checks: write # Write access to report check results
     runs-on: windows-2022
     if: ${{ !github.event.pull_request.draft }}
     strategy:
       fail-fast: false
       matrix:
-        solution: [ Testing.sln ]
-        dotnet-version: [ '8.0.x' ]
+        solution: [Testing.sln]
+        dotnet-version: ["8.0.x"]
 
     steps:
       - name: Checkout [${{ github.event.pull_request.head.ref }}]
@@ -72,13 +80,13 @@ jobs:
         uses: actions/setup-dotnet@v4
         with:
           dotnet-version: ${{ matrix.dotnet-version }}
-        
+
       - name: Setup NuGet
         uses: NuGet/setup-nuget@v2.0.0
-        
+
       - name: Restore NuGet
-        run: nuget restore ${{ env.PROJECT_FILE_PATH }}
-      
+        run: nuget restore
+
       - name: Restore Dependencies
         if: ${{ !fromJSON(steps.getCanSkip.outputs.result) }}
         run: dotnet restore
@@ -86,6 +94,7 @@ jobs:
       ####################################################################################################
       ###                                          Run Tests                                           ###
       ####################################################################################################
+      # Test 1 - Build Solution
       - name: Build
         if: ${{ !fromJSON(steps.getCanSkip.outputs.result) }}
         run: dotnet build --no-restore
@@ -94,19 +103,18 @@ jobs:
         if: failure()
         uses: ./.github/actions/tools/annotation/error
         with:
-          message: '[Error] Build Failed for ${{ matrix.solution }}'
-      
+          message: "[Error] Build Failed for ${{ matrix.solution }}"
+
       # Test 2 - Run All Unit Tests within Project
-      # Note: This Action Requires Windows
       - name: Run Tests for [${{ matrix.solution }}]
         if: ${{ !fromJSON(steps.getCanSkip.outputs.result) }}
-        run: dotnet test --no-build --verbosity normal
+        run: dotnet test --no-build --verbosity normal --collect "XPlat Code Coverage"
 
       - name: Error - Tests Failed for ${{ matrix.solution }}
         if: failure()
         uses: ./.github/actions/tools/annotation/error
         with:
-          message: '[Error] Tests Failed for ${{ matrix.solution }}'
+          message: "[Error] Tests Failed for ${{ matrix.solution }}"
 
       ####################################################################################################
       ###                                        Notify Success                                        ###
@@ -115,10 +123,10 @@ jobs:
         if: success() && !fromJSON(steps.getCanSkip.outputs.result)
         uses: ./.github/actions/tools/annotation/notice
         with:
-          message: '[Success] Built & Ran Tests for ${{ matrix.solution }}'
+          message: "[Success] Built & Ran Tests for ${{ matrix.solution }}"
 
       - name: Success - Skipped Tests for ${{ matrix.solution }}
         if: success() && fromJSON(steps.getCanSkip.outputs.result)
         uses: ./.github/actions/tools/annotation/notice
         with:
-          message: '[Success] Skipped Tests for ${{ matrix.solution }}'
+          message: "[Success] Skipped Tests for ${{ matrix.solution }}"

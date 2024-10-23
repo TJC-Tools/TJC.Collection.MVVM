@@ -1,26 +1,27 @@
-name: Pull Request Merge → Tag
-run-name: ${{ format('PR#{0} - {1}', github.event.number, !github.event.pull_request.merged && 'Closed without merging' || !contains(join(github.event.pull_request.labels.*.name, ', '), 'major') && !contains(join(github.event.pull_request.labels.*.name, ', '), 'minor') && !contains(join(github.event.pull_request.labels.*.name, ', '), 'patch') && 'Merged [No Increment Label Specified]' || format('Merged → Tag [{0}]', join(github.event.pull_request.labels.*.name, ', ')))  }}
 # If the pull request was not merged; the run-name will be 'PR#123 - Closed without merging'
 # If labels does not contain 'major', 'minor', or 'patch'; the run-name will be 'PR#123 - Merged [No Increment Label Specified]'
 # Otherwise, if the pull request was merged the run-name will be 'PR#123 - Merged → Tag [patch]'
+---
+name: Pull Request Merge → Tag
+run-name: ${{ format('PR#{0} - {1}', github.event.number, !github.event.pull_request.merged && 'Closed without merging' || !contains(join(github.event.pull_request.labels.*.name, ', '), 'major') && !contains(join(github.event.pull_request.labels.*.name, ', '), 'minor') && !contains(join(github.event.pull_request.labels.*.name, ', '), 'patch') && 'Merged [No Increment Label Specified]' || format('Merged → Tag [{0}]', join(github.event.pull_request.labels.*.name, ', ')))  }}
 
 on:
   pull_request:
-    types: closed
+    types:
+      - closed
     branches:
       - main
 
 concurrency:
   group: Versioning-${{ github.ref_name }}
   cancel-in-progress: false
-  
-env:
-  PROJECT_DIR_PATH: TJC.Collection.MVVM
 
 jobs:
   incrementVersion:
     name: PR#[${{ github.event.number }}] Merge - Increment Version
-    permissions: write-all
+    permissions:
+      contents: write # Needed for pushing commits and tags
+      pull-requests: read # Needed to read pull request labels and metadata
     if: github.event.pull_request.merged && (contains(join(github.event.pull_request.labels.*.name, ', '), 'major') || contains(join(github.event.pull_request.labels.*.name, ', '), 'minor') || contains(join(github.event.pull_request.labels.*.name, ', '), 'patch'))
     runs-on: windows-2022
     outputs:
@@ -64,7 +65,7 @@ jobs:
           command: bump
           version: ${{ steps.get-version-increment-type.outputs.result }}
           keep-unreleased-section: true
-  
+
       - name: Commit Changelog [${{ steps.update-changelog.outputs.version }}]
         run: |
           git config --local user.email "github-actions[bot]@users.noreply.github.com"
@@ -79,7 +80,6 @@ jobs:
       ### TAG & PUSH ###
       ##################
       - name: Tag Version [${{ steps.update-changelog.outputs.version }}]
-        if: ${{ steps.update-changelog.outputs.version != steps.getLastVersion.outputs.result }}
         run: |
           git tag v${{ steps.update-changelog.outputs.version }}
           git push origin tag v${{ steps.update-changelog.outputs.version }}
