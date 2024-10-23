@@ -1,20 +1,21 @@
+# Creation of a version tag will trigger this workflow
+# A new release will be created from the tag
+---
 name: Tag → Create Package
 run-name: Tag [${{ github.ref_name }}] → Create Package
 
 on:
   push:
-    tags: v**
-
-env:
-  PROJECT_NAME: TJC.Collection.MVVM
-  PROJECT_DIR_PATH: TJC.Collection.MVVM
-  PROJECT_FILE_PATH: TJC.Collection.MVVM/TJC.Collection.MVVM.csproj
+    tags:
+      - v**
 
 jobs:
   package:
     name: Create Package [${{ github.ref_name }}]
     runs-on: windows-2022
-    permissions: write-all
+    permissions:
+      contents: write # Needed for pushing commits and tags
+      packages: write # Needed for pushing packages to GitHub Packages
     steps:
       - name: Checkout [${{ github.ref_name }}]
         uses: actions/checkout@v4
@@ -29,16 +30,16 @@ jobs:
       - name: Setup .NET 8.0
         uses: actions/setup-dotnet@v4
         with:
-          dotnet-version: '8.0.*'
+          dotnet-version: "8.0.*"
 
       - name: Setup MSBuild
         uses: microsoft/setup-msbuild@v2
-        
+
       - name: Setup NuGet
         uses: NuGet/setup-nuget@v2.0.0
-        
+
       - name: Restore NuGet
-        run: nuget restore ${{ env.PROJECT_FILE_PATH }}
+        run: nuget restore ${{ github.repository }}/${{ github.repository }}.csproj
 
       - name: Get Version without Prefix/Suffix
         id: getVer
@@ -53,15 +54,15 @@ jobs:
             return simple
 
       - name: Pack NuGet Package [${{ steps.getVer.outputs.result }}]
-        run: dotnet pack ${{ env.PROJECT_FILE_PATH }} -p:Version='${{ steps.getVer.outputs.result }}' -c Release   
+        run: dotnet pack ${{ github.repository }}/${{ github.repository }}.csproj -p:Version='${{ steps.getVer.outputs.result }}' -c Release
 
       - name: List
-        run: ls ${{ env.PROJECT_DIR_PATH }}/bin/Release
+        run: ls ${{ github.repository }}/bin/Release
 
       - name: Push Package to NuGet & GitHub Packages
         shell: powershell
         run: |
-          $files = gci -File "${{ env.PROJECT_DIR_PATH }}/bin/Release/*.nupkg"
+          $files = gci -File "${{ github.repository }}/bin/Release/*.nupkg"
           foreach ($file in $files)
           {
             echo "Pushing NuGet Package: $file"
@@ -72,9 +73,9 @@ jobs:
       - name: Release [${{ github.ref_name }}]
         uses: ncipollo/release-action@v1.14.0
         with:
-          name: ${{ env.PROJECT_NAME }} ${{ steps.getVer.outputs.result }}
+          name: ${{ github.repository }} ${{ steps.getVer.outputs.result }}
           tag: ${{ github.ref_name }}
-          artifacts: "${{ env.PROJECT_DIR_PATH }}/bin/Release/*.nupkg"
+          artifacts: "${{ github.repository }}/bin/Release/*.nupkg"
           generateReleaseNotes: true
 
       - name: ${{ format('Published NuGet Package [{0}]', steps.getVer.outputs.result) }}
@@ -87,4 +88,4 @@ jobs:
         if: failure()
         uses: ./.github/actions/tools/annotation/error
         with:
-          message: '[Error] Failed to Publish NuGet Package'
+          message: "[Error] Failed to Publish NuGet Package"
