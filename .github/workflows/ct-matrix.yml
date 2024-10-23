@@ -4,9 +4,22 @@
 # 3. Upload code coverage
 ---
 name: Testing Matrix
-run-name: PR#${{ github.event.number }}${{ github.event.pull_request.draft && ' [DRAFT]' || '' }} - Continuous Testing (Matrix) - (${{ github.event.pull_request.head.ref }}-to-${{ github.event.pull_request.base.ref }})
+run-name: >-
+  ${{
+    format(
+      '{0}{1}{2} - Continuous Testing (Matrix) - ({3}-to-{4})',
+      github.event_name == 'pull_request' && 'PR#' || 'Push',
+      github.event.pull_request.draft && ' [DRAFT]' || '',
+      github.event_name == 'pull_request' && github.event.number || format(' [{0}]',github.ref_name),
+      github.event.pull_request.head.ref,
+      github.event.pull_request.base.ref
+    )
+  }}
 
 on:
+  push:
+    branches:
+      - main
   pull_request:
     branches:
       - main
@@ -51,14 +64,16 @@ jobs:
       ###                                          Initialize                                          ###
       ####################################################################################################
       # Check for Changes in the Non-Ignored Files; If there are none, then Skip Tests
-      # Skip: README, LICENSE, .gitignore, GitHub Workflows & Actions, etc.
+      # Skip: README, CHANGELOG, LICENSE, THIRD-PARTY-LICENSES, .gitignore, GitHub Workflows & Actions, etc.
       - name: Check for Changes to Determine if Tests can be Skipped
         id: getChanges
         uses: tj-actions/changed-files@v45.0.3
         with:
           files_ignore: |
             README.md
+            CHANGELOG.md
             LICENSE
+            THIRD-PARTY-LICENSES
             .github/**
             .gitignore
 
@@ -115,6 +130,19 @@ jobs:
         uses: ./.github/actions/tools/annotation/error
         with:
           message: "[Error] Tests Failed for ${{ matrix.solution }}"
+
+      ####################################################################################################
+      ###                                        Code Coverage                                         ###
+      ####################################################################################################
+      - name: Upload Results to Codecov (Optional)
+        if: ${{ !fromJSON(steps.getCanSkip.outputs.result) }}
+        uses: codecov/codecov-action@v4
+        with:
+          token: ${{ secrets.CODECOV_TOKEN }}
+          files: "**/TestResults/**/coverage.cobertura.xml"
+          flags: unit-tests
+          fail_ci_if_error: true
+          verbose: true
 
       ####################################################################################################
       ###                                        Notify Success                                        ###
