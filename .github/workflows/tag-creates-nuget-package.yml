@@ -39,7 +39,7 @@ jobs:
         uses: NuGet/setup-nuget@v2.0.0
 
       - name: Restore NuGet
-        run: nuget restore ${{ github.repository }}/${{ github.repository }}.csproj
+        run: nuget restore ${{ github.repository.name }}/${{ github.repository.name }}.csproj
 
       - name: Get Version without Prefix/Suffix
         id: getVer
@@ -54,15 +54,15 @@ jobs:
             return simple
 
       - name: Pack NuGet Package [${{ steps.getVer.outputs.result }}]
-        run: dotnet pack ${{ github.repository }}/${{ github.repository }}.csproj -p:Version='${{ steps.getVer.outputs.result }}' -c Release
+        run: dotnet pack ${{ github.repository.name }}/${{ github.repository.name }}.csproj -p:Version='${{ steps.getVer.outputs.result }}' -c Release
 
       - name: List
-        run: ls ${{ github.repository }}/bin/Release
+        run: ls ${{ github.repository.name }}/bin/Release
 
       - name: Push Package to NuGet & GitHub Packages
         shell: powershell
         run: |
-          $files = gci -File "${{ github.repository }}/bin/Release/*.nupkg"
+          $files = gci -File "${{ github.repository.name }}/bin/Release/*.nupkg"
           foreach ($file in $files)
           {
             echo "Pushing NuGet Package: $file"
@@ -73,9 +73,9 @@ jobs:
       - name: Release [${{ github.ref_name }}]
         uses: ncipollo/release-action@v1.14.0
         with:
-          name: ${{ github.repository }} ${{ steps.getVer.outputs.result }}
+          name: ${{ github.repository.name }} ${{ steps.getVer.outputs.result }}
           tag: ${{ github.ref_name }}
-          artifacts: "${{ github.repository }}/bin/Release/*.nupkg"
+          artifacts: "${{ github.repository.name }}/bin/Release/*.nupkg"
           generateReleaseNotes: true
 
       - name: ${{ format('Published NuGet Package [{0}]', steps.getVer.outputs.result) }}
