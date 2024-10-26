@@ -9,6 +9,7 @@
 	<Authors>Tyler Carrol</Authors>
 	<PackageReadmeFile>README.md</PackageReadmeFile>
 	<PackageLicenseFile>LICENSE</PackageLicenseFile>
+	<PackageReleaseNotes>$([System.IO.File]::ReadAllText("$(MSBuildProjectDirectory)/../CHANGELOG.md"))</PackageReleaseNotes>
 	<RepositoryUrl>https://github.com/TJC-Tools/TJC.Collection.MVVM</RepositoryUrl>
   </PropertyGroup>
   <!-- INCLUDED FILES -->
