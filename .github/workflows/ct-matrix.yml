@@ -1,28 +1,43 @@
 # This workflow is used test the project, by doing the following
 # 1. Ensure the project builds
+# 2. Run all tests
+# 3. Upload code coverage
 ---
 name: Testing Matrix
 run-name: >-
   ${{
     format(
-      '{0}{1}{2} - Continuous Testing (Matrix) - ({3}-to-{4})',
-      github.event_name == 'pull_request' && 'PR#' || 'Push',
-      github.event.pull_request.draft && ' [DRAFT]' || '',
-      github.event_name == 'pull_request' && github.event.number || format(' [{0}]',github.ref_name),
-      github.event.pull_request.head.ref,
-      github.event.pull_request.base.ref
+      '{0} - Continuous Testing (Matrix){1}',
+      github.event_name == 'pull_request'
+        && format('PR#{0}{1}',github.event.number, github.event.pull_request.draft && ' [DRAFT]' || '')
+        || format('Push [{0}]', github.ref_name),
+      github.event_name == 'pull_request'
+        && format(' - [{0}-to-{1}]', github.event.pull_request.head.ref, github.event.pull_request.base.ref)
+        || ''
     )
   }}
 
 on:
+  push:
+    branches:
+      - main
+      - develop
   pull_request:
     branches:
       - main
+      - develop
     types:
       - opened
       - reopened
       - synchronize
       - ready_for_review
+  # Trigger if target branch was changed to a trunk
+  pull_request_target:
+    types:
+      - edited
+    branches:
+      - main
+      - develop
 
 env:
   build_directory: Build
@@ -33,9 +48,9 @@ concurrency:
   cancel-in-progress: true
 
 jobs:
-  buildAndRunTests:
-    name: Continuous Testing
-    permissions:      
+  tests:
+    name: Continuous Testing # Note: This name & matrix are used within the status checks - do not change
+    permissions:
       contents: read # Read access to code and content in the repository
       pull-requests: read # Read access to pull request metadata for the event
       checks: write # Write access to report check results
@@ -48,7 +63,7 @@ jobs:
         dotnet-version: ["8.0.x"]
 
     steps:
-      - name: Checkout [${{ github.event.pull_request.head.ref }}]
+      - name: ${{ format('Checkout [{0}]', github.event_name == 'pull_request' && github.event.pull_request.head.ref || github.ref_name) }}
         uses: actions/checkout@v4
         with:
           ref: ${{ github.event.pull_request.head.ref }}
@@ -87,17 +102,14 @@ jobs:
       ###                                     Prepare to Run Tests                                     ###
       ####################################################################################################
       - name: Setup .NET [${{ matrix.dotnet-version }}]
-        if: ${{ !fromJSON(steps.getCanSkip.outputs.result) }}
         uses: actions/setup-dotnet@v4
         with:
           dotnet-version: ${{ matrix.dotnet-version }}
 
       - name: Setup NuGet
-        if: ${{ !fromJSON(steps.getCanSkip.outputs.result) }}
         uses: NuGet/setup-nuget@v2.0.0
 
       - name: Restore NuGet
-        if: ${{ !fromJSON(steps.getCanSkip.outputs.result) }}
         run: nuget restore
 
       - name: Restore Dependencies
