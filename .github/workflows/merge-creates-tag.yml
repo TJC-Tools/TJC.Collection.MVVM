@@ -24,8 +24,6 @@ jobs:
       pull-requests: read # Needed to read pull request labels and metadata
     if: github.event.pull_request.merged && (contains(join(github.event.pull_request.labels.*.name, ', '), 'major') || contains(join(github.event.pull_request.labels.*.name, ', '), 'minor') || contains(join(github.event.pull_request.labels.*.name, ', '), 'patch'))
     runs-on: windows-2022
-    outputs:
-      VersionNumber: ${{ steps.incrementVersion.outputs.result }}
     steps:
       - name: Checkout
         uses: actions/checkout@v4
@@ -72,7 +70,7 @@ jobs:
           git config --local user.name "github-actions[bot]"
           git commit -a -m "🤖 automated: Changelog ${{ steps.update-changelog.outputs.version }}" -m "Release Notes: ${{ steps.update-changelog.outputs.release-notes }}"
           git remote set-url origin https://<PAT>@github.com/${{ github.repository }}.git
-          git push 
+          git push
         env:
           PAT: ${{ secrets.TJC_TOKEN }}
 
