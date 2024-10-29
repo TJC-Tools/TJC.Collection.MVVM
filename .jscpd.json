@@ -1,6 +1,4 @@
 {
-  "min-tokens": 50,
-  "min-lines": 5,
   "threshold": 0.1,
   "ignore": ["*.Tests/**"]
 }
