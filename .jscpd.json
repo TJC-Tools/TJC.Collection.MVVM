@@ -1,6 +1,6 @@
 {
   "min-tokens": 50,
   "min-lines": 5,
-  "max-duplicate-count": 2,
+  "threshold": 0.1,
   "ignore": ["*.Tests/**"]
 }
