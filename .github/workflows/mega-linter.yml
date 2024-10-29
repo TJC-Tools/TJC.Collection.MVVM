@@ -1,0 +1,115 @@
+# MegaLinter GitHub Action configuration file
+# More info at https://megalinter.io
+# https://github.com/oxsecurity/megalinter/blob/main/TEMPLATES/mega-linter.yml
+---
+name: MegaLinter
+run-name: >-
+  ${{
+    format(
+      '{0} - MegaLinter{1}',
+      github.event_name == 'pull_request'
+        && format('PR#{0}{1}', github.event.number, github.event.pull_request.draft && ' [DRAFT]' || '')
+        || format('Push [{0}]', github.ref_name),
+      github.event_name == 'pull_request'
+        && format(' - [{0}-to-{1}]', github.event.pull_request.head.ref, github.event.pull_request.base.ref)
+        || ''
+    )
+  }}
+
+on:
+  push:
+    branches:
+      - main
+  pull_request:
+    branches:
+      - main
+  pull_request_target:
+    types:
+      - edited
+    branches:
+      - main
+
+concurrency:
+  group: MegaLinter-${{ github.ref_name }}
+  cancel-in-progress: true
+
+jobs:
+  megalinter:
+    name: MegaLinter
+    runs-on: ubuntu-latest
+
+    # Give the default GITHUB_TOKEN write permission to commit and push, comment
+    # issues & post new PR; remove the ones you do not need
+    permissions:
+      contents: write
+      issues: write
+      pull-requests: write
+
+    steps:
+      - name: Checkout Code
+        uses: actions/checkout@v4
+        with:
+          token: ${{ secrets.GITHUB_TOKEN }}
+          fetch-depth: 0
+
+      - name: MegaLinter
+        uses: oxsecurity/megalinter@v8
+        id: megalinter
+        env:
+          CONFIG_FILE: .mega-linter.yml
+          # Only validate the whole codebase on push to main
+          VALIDATE_ALL_CODEBASE: >-
+            ${{
+              github.event_name == 'push' &&
+              contains(fromJSON('["refs/heads/main"]'), github.ref)
+            }}
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+
+      # Upload MegaLinter artifacts
+      - name: Archive production artifacts
+        uses: actions/upload-artifact@v4
+        if: success() || failure()
+        with:
+          name: MegaLinter reports
+          path: |
+            megalinter-reports
+            mega-linter.log
+
+      # Delete MegaLinter reports before creating PR
+      - name: Delete MegaLinter Reports
+        if: ${{ (success() || failure()) && steps.megalinter.outputs.has_updated_sources == 1 }}
+        run: |
+          sudo rm -rf megalinter-reports
+          sudo rm -f mega-linter.log
+
+      # Create pull request if applicable
+      - name: Create Pull Request with applied fixes [${{ steps.megalinter.outputs.has_updated_sources }}]
+        uses: peter-evans/create-pull-request@v6
+        id: create-pr
+        if: ${{ (success() || failure()) && steps.megalinter.outputs.has_updated_sources == 1 }}
+        with:
+          token: ${{ secrets.TJC_TOKEN || secrets.GITHUB_TOKEN }}
+          base: ${{ github.event.pull_request.head.ref }}
+          branch: MegaLinter-${{ github.event.pull_request.head.ref }}
+          branch-suffix: short-commit-hash
+          title: "🧹 chore: [MegaLinter] Apply [${{ steps.megalinter.outputs.has_updated_sources }}] automatic fixes"
+          commit-message: "🧹 chore: [MegaLinter] Apply [${{ steps.megalinter.outputs.has_updated_sources }}] automatic fixes"
+          body: >-
+            ${{
+              format(
+                '[MegaLinter](.github/workflows/mega-linter.yml) - Merge [{0}] {1} for {2}',
+                  steps.megalinter.outputs.has_updated_sources,
+                  steps.megalinter.outputs.has_updated_sources == 1 && 'fix' || 'fixes',
+                  github.event_name == 'pull_request'
+                    && format('PR #{0}', github.event.pull_request.number)
+                    || format('Push to [{0}]', github.ref_name)
+              )
+            }}
+          assignees: TylerCarrol
+          labels: bot,linter
+
+      - name: Create PR output
+        if: ${{ (success() || failure()) && steps.megalinter.outputs.has_updated_sources == 1 }}
+        run: |
+          echo "PR Number - ${{ steps.create-pr.outputs.pull-request-number }}"
+          echo "PR URL - ${{ steps.create-pr.outputs.pull-request-url }}"

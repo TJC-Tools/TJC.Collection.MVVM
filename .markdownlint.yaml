@@ -1,0 +1,12 @@
+# https://github.com/DavidAnson/markdownlint/blob/main/schema/.markdownlint.yaml
+
+# Default state for all rules
+default: true
+
+# Path to configuration file to extend
+extends: null
+
+# MD024/no-duplicate-heading : Multiple headings with the same content
+MD024:
+  # Only check sibling headings (to allow changelogs to have duplicate headings)
+  siblings_only: true
