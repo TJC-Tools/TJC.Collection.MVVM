@@ -84,7 +84,7 @@ jobs:
 
       # Create pull request if applicable
       - name: Create Pull Request with applied fixes [${{ steps.megalinter.outputs.has_updated_sources }}]
-        uses: peter-evans/create-pull-request@v6
+        uses: peter-evans/create-pull-request@v7
         id: create-pr
         if: ${{ (success() || failure()) && steps.megalinter.outputs.has_updated_sources == 1 }}
         with:
