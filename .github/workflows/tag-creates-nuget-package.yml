@@ -78,7 +78,7 @@ jobs:
         with:
           name: ${{ github.event.repository.name }} ${{ steps.getVer.outputs.result }}
           tag: ${{ github.ref_name }}
-          artifacts: "${{ github.event.repository.name }}/bin/Release/*.nupkg,${{ github.event.repository.name }}/bin/Release/net8.0/**.dll,${{ github.event.repository.name }}/bin/Release/net8.0/**.xml"
+          artifacts: "${{ github.event.repository.name }}/bin/Release/*.nupkg,${{ github.event.repository.name }}/bin/Release/net8.0/**.dll,${{ github.event.repository.name }}/bin/Release/net8.0/**.pdb,${{ github.event.repository.name }}/bin/Release/net8.0/**.xml"
           generateReleaseNotes: true
 
       - name: ${{ format('Published NuGet Package [{0}]', steps.getVer.outputs.result) }}
