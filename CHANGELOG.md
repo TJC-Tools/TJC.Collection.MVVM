@@ -7,6 +7,10 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+### Changed
+
+- Add all dependency `.dll's` to the release
+
 ## [0.17.0] - 2024-11-06
 
 ## [0.16.0] - 2024-11-06
