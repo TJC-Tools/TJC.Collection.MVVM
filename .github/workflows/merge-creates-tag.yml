@@ -68,7 +68,7 @@ jobs:
         run: |
           git config --local user.email "github-actions[bot]@users.noreply.github.com"
           git config --local user.name "github-actions[bot]"
-          git commit -a -m "🤖 automated: Changelog ${{ steps.update-changelog.outputs.version }}" -m "Release Notes: ${{ steps.update-changelog.outputs.release-notes }}"
+          git commit -a -m "🤖 automated: Changelog ${{ steps.update-changelog.outputs.version }}"
           git remote set-url origin https://<PAT>@github.com/${{ github.repository }}.git
           git push
         env:
