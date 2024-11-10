@@ -53,6 +53,9 @@ jobs:
             console.log('Version:', simple)
             return simple
 
+      - name: Publish [${{ steps.getVer.outputs.result }}]
+        run: dotnet publish ${{ github.event.repository.name }}/${{ github.event.repository.name }}.csproj -c Release
+
       - name: Pack NuGet Package [${{ steps.getVer.outputs.result }}]
         run: dotnet pack ${{ github.event.repository.name }}/${{ github.event.repository.name }}.csproj -p:Version='${{ steps.getVer.outputs.result }}' -c Release
 
@@ -61,6 +64,9 @@ jobs:
 
       - name: List Files (net8.0)
         run: ls ${{ github.event.repository.name }}/bin/Release/net8.0
+
+      - name: List Files (publish)
+        run: ls ${{ github.event.repository.name }}/bin/Release/net8.0/publish
 
       - name: Push Package to NuGet & GitHub Packages
         shell: powershell
@@ -78,7 +84,7 @@ jobs:
         with:
           name: ${{ github.event.repository.name }} ${{ steps.getVer.outputs.result }}
           tag: ${{ github.ref_name }}
-          artifacts: "${{ github.event.repository.name }}/bin/Release/*.nupkg,${{ github.event.repository.name }}/bin/Release/net8.0/**.dll,${{ github.event.repository.name }}/bin/Release/net8.0/**.pdb,${{ github.event.repository.name }}/bin/Release/net8.0/**.xml"
+          artifacts: "${{ github.event.repository.name }}/bin/Release/*.nupkg,${{ github.event.repository.name }}/bin/Release/net8.0/publish/**.dll,${{ github.event.repository.name }}/bin/Release/net8.0/publish/**.pdb,${{ github.event.repository.name }}/bin/Release/net8.0/publish/**.xml"
           generateReleaseNotes: true
 
       - name: ${{ format('Published NuGet Package [{0}]', steps.getVer.outputs.result) }}
