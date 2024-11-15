@@ -1,0 +1,77 @@
+# This workflow ensures that a change was made to the changelog
+---
+name: Changelog Changed
+run-name: >-
+  ${{
+    format(
+      '{0} - Changelog Changed{1}',
+      github.event_name == 'pull_request'
+        && format('PR#{0}{1}',github.event.number, github.event.pull_request.draft && ' [DRAFT]' || '')
+        || format('Push [{0}]', github.ref_name),
+      github.event_name == 'pull_request'
+        && format(' - [{0}-to-{1}]', github.event.pull_request.head.ref, github.event.pull_request.base.ref)
+        || ''
+    )
+  }}
+
+on:
+  pull_request:
+    branches:
+      - main
+      - develop
+    types:
+      - opened
+      - reopened
+      - synchronize
+      - ready_for_review
+  # Trigger if target branch was changed to a trunk
+  pull_request_target:
+    types:
+      - edited
+    branches:
+      - main
+      - develop
+
+concurrency:
+  group: Changelog-${{ github.event.pull_request.head.ref }}-to-${{ github.event.pull_request.base.ref }}
+  cancel-in-progress: true
+
+jobs:
+  checkForChangesToChangelog:
+    name: Changelog Changed
+    permissions:
+      contents: read # Read access to code and content in the repository
+      pull-requests: read # Read access to pull request metadata for the event
+      checks: write # Write access to report check results
+    runs-on: ubuntu-latest
+    if: ${{ !github.event.pull_request.draft }}
+
+    steps:
+      # Checkout pull request branch
+      - name: ${{ format('Checkout [{0}]', github.event_name == 'pull_request' && github.event.pull_request.head.ref || github.ref_name) }}
+        uses: actions/checkout@v4
+        with:
+          ref: ${{ github.event.pull_request.head.ref }}
+          token: ${{ secrets.TJC_TOKEN || secrets.GITHUB_TOKEN }}
+
+      # Check for Changes in Changelog
+      - name: Check for Changes to Changelog
+        id: getChanges
+        uses: tj-actions/changed-files@v45.0.3
+        with:
+          files: CHANGELOG.md
+
+      # Report Success
+      - name: Success - Changelog Changed
+        if: steps.getChanges.outputs.any_modified == 'true'
+        uses: ./.github/actions/tools/annotation/notice
+        with:
+          message: "[Success] Changelog Changed"
+
+      # Report Failure
+      - name: Failure - Changelog Not Changed
+        if: steps.getChanges.outputs.any_modified != 'true'
+        uses: ./.github/actions/tools/exit-code
+        with:
+          code: 5
+          message: "Changelog Not Changed"

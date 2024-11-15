@@ -44,4 +44,9 @@ runs:
         message: ${{ steps.createMessage.outputs.result }}
 
     - shell: cmd
+      if: ${{ runner.os == 'Windows' }}
+      run: exit ${{ inputs.code }}
+
+    - shell: bash
+      if: ${{ runner.os != 'Windows' }}
       run: exit ${{ inputs.code }}
