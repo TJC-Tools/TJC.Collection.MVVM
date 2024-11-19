@@ -59,6 +59,12 @@ jobs:
       - name: Pack NuGet Package [${{ steps.getVer.outputs.result }}]
         run: dotnet pack ${{ github.event.repository.name }}/${{ github.event.repository.name }}.csproj -p:Version='${{ steps.getVer.outputs.result }}' -c Release
 
+      - name: List Files (obj)
+        run: ls ${{ github.event.repository.name }}/obj
+        
+      - name: List Files (bin)
+        run: ls ${{ github.event.repository.name }}/bin
+        
       - name: List Files (Release)
         run: ls ${{ github.event.repository.name }}/bin/Release
 
@@ -84,7 +90,7 @@ jobs:
         with:
           name: ${{ github.event.repository.name }} ${{ steps.getVer.outputs.result }}
           tag: ${{ github.ref_name }}
-          artifacts: "${{ github.event.repository.name }}/bin/Release/*.nupkg,${{ github.event.repository.name }}/bin/Release/net8.0/publish/**.dll,${{ github.event.repository.name }}/bin/Release/net8.0/publish/**.pdb,${{ github.event.repository.name }}/bin/Release/net8.0/publish/**.xml"
+          artifacts: "${{ github.event.repository.name }}/bin/Release/*.nupkg,${{ github.event.repository.name }}/bin/Release/net8.0/publish/**.dll,${{ github.event.repository.name }}/bin/Release/net8.0/publish/**.pdb,${{ github.event.repository.name }}/bin/Release/net8.0/publish/**.xml,${{ github.event.repository.name }}/obj/project.assets.json"
           generateReleaseNotes: true
 
       - name: ${{ format('Published NuGet Package [{0}]', steps.getVer.outputs.result) }}
