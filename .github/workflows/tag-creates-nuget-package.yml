@@ -61,10 +61,10 @@ jobs:
 
       - name: List Files (obj)
         run: ls ${{ github.event.repository.name }}/obj
-        
+
       - name: List Files (bin)
         run: ls ${{ github.event.repository.name }}/bin
-        
+
       - name: List Files (Release)
         run: ls ${{ github.event.repository.name }}/bin/Release
 
