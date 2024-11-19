@@ -7,6 +7,8 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+## [0.18.0] - 2024-11-19
+
 ### Added
 
 - File `project.assets.json` to release
@@ -42,46 +44,16 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - Package reference TJC.Collection.GUI
 - Package reference TJC.MVVM
 
-[Unreleased]: https://github.com/TJC-Tools/TJC.Collection.MVVM/compare/v0.17.8...HEAD
+[Unreleased]: https://github.com/TJC-Tools/TJC.Collection.MVVM/compare/v0.18.0...HEAD
 
+[0.18.0]: https://github.com/TJC-Tools/TJC.Collection.MVVM/compare/v0.17.5...v0.18.0
 
+[0.17.5]: https://github.com/TJC-Tools/TJC.Collection.MVVM/compare/v0.17.1...v0.17.5
 
+[0.17.1]: https://github.com/TJC-Tools/TJC.Collection.MVVM/compare/v0.13.1...v0.17.1
 
-[0.17.5]: https://github.com/TJC-Tools/TJC.Collection.MVVM/compare/v0.17.4...v0.17.5
+[0.13.1]: https://github.com/TJC-Tools/TJC.Collection.MVVM/compare/v0.7.0...v0.13.1
 
-
-
-
-[0.17.1]: https://github.com/TJC-Tools/TJC.Collection.MVVM/compare/v0.17.0...v0.17.1
-
-
-
-
-
-
-
-
-
-
-[0.13.1]: https://github.com/TJC-Tools/TJC.Collection.MVVM/compare/v0.13.0...v0.13.1
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-[0.7.0]: https://github.com/TJC-Tools/TJC.Collection.MVVM/compare/v0.6.0...v0.7.0
-
-
-
-
+[0.7.0]: https://github.com/TJC-Tools/TJC.Collection.MVVM/compare/v0.2.0...v0.7.0
 
 [0.2.0]: https://github.com/TJC-Tools/TJC.Collection.MVVM/releases/tag/v0.2.0
