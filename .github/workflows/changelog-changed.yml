@@ -57,7 +57,7 @@ jobs:
       # Check for Changes in Changelog
       - name: Check for Changes to Changelog
         id: getChanges
-        uses: tj-actions/changed-files@v45.0.3
+        uses: tj-actions/changed-files@v45.0.4
         with:
           files: CHANGELOG.md
 
