@@ -24,6 +24,8 @@ on:
       - reopened
       - synchronize
       - ready_for_review
+      - labeled
+      - unlabeled
   # Trigger if target branch was changed to a trunk
   pull_request_target:
     types:
@@ -55,11 +57,26 @@ jobs:
           token: ${{ secrets.TJC_TOKEN || secrets.GITHUB_TOKEN }}
 
       # Check for Changes in Changelog
+      # Or skip if there is no major, minor, or patch label
       - name: Check for Changes to Changelog
         id: getChanges
+        if: |
+          contains(github.event.label.name, 'major') ||
+          contains(github.event.label.name, 'minor') ||
+          contains(github.event.label.name, 'patch')
         uses: tj-actions/changed-files@v45.0.4
         with:
           files: CHANGELOG.md
+
+      # Report Skipped
+      - name: Skipped - Version Not Changed
+        if: |
+          !contains(github.event.label.name, 'major') &&
+          !contains(github.event.label.name, 'minor') &&
+          !contains(github.event.label.name, 'patch')
+        uses: ./.github/actions/tools/annotation/notice
+        with:
+          message: "[Skipped] Version Not Changed"
 
       # Report Success
       - name: Success - Changelog Changed
@@ -70,7 +87,7 @@ jobs:
 
       # Report Failure
       - name: Failure - Changelog Not Changed
-        if: steps.getChanges.outputs.any_modified != 'true'
+        if: steps.getChanges.outputs.any_modified == 'false'
         uses: ./.github/actions/tools/exit-code
         with:
           code: 5
