@@ -86,7 +86,7 @@ jobs:
           }
 
       - name: Release [${{ github.ref_name }}]
-        uses: ncipollo/release-action@v1.14.0
+        uses: ncipollo/release-action@v1.16.0
         with:
           name: ${{ github.event.repository.name }} ${{ steps.getVer.outputs.result }}
           tag: ${{ github.ref_name }}
