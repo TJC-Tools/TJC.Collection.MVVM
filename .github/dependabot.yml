@@ -1,0 +1,14 @@
+version: 2
+
+updates:
+  - package-ecosystem: nuget
+    directory: "/"
+    commit-message:
+      prefix: "(dependabot)"
+    assignees:
+      - "TylerCarrol"
+    reviewers:
+      - "TylerCarrol"
+    schedule:
+      interval: daily
+    open-pull-requests-limit: 25
