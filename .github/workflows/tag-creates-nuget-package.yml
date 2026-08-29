@@ -16,6 +16,7 @@ jobs:
     permissions:
       contents: write # Needed for pushing commits and tags
       packages: write # Needed for pushing packages to GitHub Packages
+      id-token: write # Needed for temporary api key
     steps:
       - name: Checkout [${{ github.ref_name }}]
         uses: actions/checkout@v4
@@ -27,6 +28,12 @@ jobs:
       - name: Add GitHub NuGet Source
         run: dotnet nuget add source --username "${{ github.repository_owner }}" --password ${{ secrets.TJC_TOKEN }} --store-password-in-clear-text --name github "https://nuget.pkg.github.com/${{ github.repository_owner }}/index.json"
 
+      - name: NuGet Temp API Key
+        uses: NuGet/login@v1
+        id: nugetLogin
+        with:
+          user: ${{ secrets.TJC_NUGET_USER }}
+      
       - name: Setup .NET 8.0
         uses: actions/setup-dotnet@v4
         with:
@@ -81,7 +88,7 @@ jobs:
           foreach ($file in $files)
           {
             echo "Pushing NuGet Package: $file"
-            dotnet nuget push "$file" --api-key ${{ secrets.TJC_NUGET_PUBLISH }} --source https://api.nuget.org/v3/index.json
+            dotnet nuget push "$file" --api-key ${{steps.nugetLogin.outputs.NUGET_API_KEY}} --source https://api.nuget.org/v3/index.json
             dotnet nuget push "$file" --api-key ${{ secrets.TJC_TOKEN }} --source github
           }
 
