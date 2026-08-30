@@ -33,7 +33,7 @@ jobs:
         id: nugetLogin
         with:
           user: ${{ secrets.TJC_NUGET_USER }}
-      
+
       - name: Setup .NET 8.0
         uses: actions/setup-dotnet@v4
         with:
