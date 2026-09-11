@@ -7,6 +7,8 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+## [0.25.6] - 2026-09-11
+
 ### Fixed
 
 - Fix grype lint errors
@@ -94,7 +96,9 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - Package reference TJC.Collection.GUI
 - Package reference TJC.MVVM
 
-[Unreleased]: https://github.com/TJC-Tools/TJC.Collection.MVVM/compare/v0.25.5...HEAD
+[Unreleased]: https://github.com/TJC-Tools/TJC.Collection.MVVM/compare/v0.25.6...HEAD
+
+[0.25.6]: https://github.com/TJC-Tools/TJC.Collection.MVVM/compare/v0.25.5...v0.25.6
 
 [0.25.5]: https://github.com/TJC-Tools/TJC.Collection.MVVM/compare/v0.25.4...v0.25.5
 
