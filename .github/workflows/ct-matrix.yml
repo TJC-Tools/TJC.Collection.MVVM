@@ -31,13 +31,8 @@ on:
       - reopened
       - synchronize
       - ready_for_review
-  # Trigger if target branch was changed to a trunk
-  pull_request_target:
-    types:
+      # Trigger if target branch was changed to a trunk
       - edited
-    branches:
-      - main
-      - develop
 
 env:
   build_directory: Build
