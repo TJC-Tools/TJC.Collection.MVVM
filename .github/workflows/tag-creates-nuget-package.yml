@@ -34,7 +34,7 @@ jobs:
         with:
           user: ${{ secrets.TJC_NUGET_USER }}
 
-      - name: Setup .NET 8.0
+      - name: Setup .NET 10.0
         uses: actions/setup-dotnet@v4
         with:
           dotnet-version: "10.0.x"
