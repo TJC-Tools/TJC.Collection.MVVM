@@ -26,13 +26,8 @@ on:
       - ready_for_review
       - labeled
       - unlabeled
-  # Trigger if target branch was changed to a trunk
-  pull_request_target:
-    types:
+      # Trigger if target branch was changed to a trunk
       - edited
-    branches:
-      - main
-      - develop
 
 concurrency:
   group: Changelog-${{ github.event.pull_request.head.ref }}-to-${{ github.event.pull_request.base.ref }}
