@@ -55,7 +55,7 @@ jobs:
       fail-fast: false
       matrix:
         solution: [Testing.sln]
-        dotnet-version: ["8.0.x"]
+        dotnet-version: ["10.0.x"]
 
     steps:
       - name: ${{ format('Checkout [{0}]', github.event_name == 'pull_request' && github.event.pull_request.head.ref || github.ref_name) }}
