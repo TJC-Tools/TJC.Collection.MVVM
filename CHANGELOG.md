@@ -7,6 +7,8 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+## [0.28.0] - 2026-09-16
+
 ## [0.27.1] - 2026-09-15
 
 ## [0.27.0] - 2026-09-15
@@ -106,7 +108,9 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - Package reference TJC.Collection.GUI
 - Package reference TJC.MVVM
 
-[Unreleased]: https://github.com/TJC-Tools/TJC.Collection.MVVM/compare/v0.27.1...HEAD
+[Unreleased]: https://github.com/TJC-Tools/TJC.Collection.MVVM/compare/v0.28.0...HEAD
+
+[0.28.0]: https://github.com/TJC-Tools/TJC.Collection.MVVM/compare/v0.27.1...v0.28.0
 
 [0.27.1]: https://github.com/TJC-Tools/TJC.Collection.MVVM/compare/v0.27.0...v0.27.1
 
